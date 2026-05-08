@@ -1,4 +1,4 @@
-package com.chen.ecommerce_backend;
+package com.chen.e_commerce_backend;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;

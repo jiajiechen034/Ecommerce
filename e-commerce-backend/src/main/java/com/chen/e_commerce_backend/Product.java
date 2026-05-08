@@ -1,4 +1,4 @@
-package com.chen.ecommerce_backend;
+package com.chen.e_commerce_backend;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -14,10 +14,14 @@ public class Product {
 
     private String name;
     private String description;
+    private String category;
     private Double price;
     private String imageUrl;
+    private Boolean sold;
 
+    // Required no-args constructor for JPA
     public Product() {
+        // Required by JPA
     }
 
     public Long getId() {
@@ -25,11 +29,19 @@ public class Product {
     }
 
     public String getName() {
-        return name;
+        return name; 
     }
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
     }
 
     public String getDescription() {
@@ -54,5 +66,13 @@ public class Product {
 
     public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
+    }
+
+    public Boolean getSold() {
+        return sold;
+    }
+    
+    public void setSold(Boolean sold) {
+        this.sold = sold;
     }
 }

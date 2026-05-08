@@ -10,7 +10,7 @@ function ProductList({
   clearMessage,
 }) {
   return (
-    <div>
+    <div className="product-list">
       {showNewProductCard && (
         <Product
           isNew={true}
@@ -19,6 +19,7 @@ function ProductList({
             name: '',
             description: '',
             price: '',
+            category: '',
             imageUrl: '',
           }}
           onCreate={onCreate}

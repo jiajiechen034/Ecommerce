@@ -1,4 +1,4 @@
-package com.chen.ecommerce_backend;
+package com.chen.e_commerce_backend;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

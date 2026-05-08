@@ -1,9 +1,8 @@
-package com.chen.ecommerce_backend;
+package com.chen.e_commerce_backend;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -34,31 +33,28 @@ public class ProductController {
     }
 
     @PostMapping("/api/products")
-    public ResponseEntity<Product> createProduct(
-            @RequestParam String name,
-            @RequestParam String description,
-            @RequestParam Double price,
-            @RequestParam(required = false) MultipartFile image
-    ) {
-        Product createdProduct = productService.createProduct(name, description, price, image);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdProduct);
+    public ResponseEntity<Product> createProduct(@ModelAttribute ProductRequest request) {
+        try {
+            Product createdProduct = productService.createProduct(request);
+            return ResponseEntity.status(HttpStatus.CREATED).body(createdProduct);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(null);
+        }
     }
 
     @PutMapping("/api/products/{id}")
-    public ResponseEntity<Product> updateProduct(
-            @PathVariable Long id,
-            @RequestParam String name,
-            @RequestParam String description,
-            @RequestParam Double price,
-            @RequestParam(required = false) MultipartFile image
-    ) {
-        Product updatedProduct = productService.updateProduct(id, name, description, price, image);
+    public ResponseEntity<Product> updateProduct(@PathVariable Long id, @ModelAttribute ProductRequest request) {
+        try {
+            Product updatedProduct = productService.updateProduct(id, request);
 
-        if (updatedProduct == null) {
-            return ResponseEntity.notFound().build();
+            if (updatedProduct == null) {
+                return ResponseEntity.notFound().build();
+            }
+
+            return ResponseEntity.ok(updatedProduct);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(null);
         }
-
-        return ResponseEntity.ok(updatedProduct);
     }
 
     @DeleteMapping("/api/products/{id}")
