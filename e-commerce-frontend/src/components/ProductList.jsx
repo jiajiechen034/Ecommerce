@@ -2,33 +2,13 @@ import Product from './Product';
 
 function ProductList({
   products,
-  onCreate,
   onUpdate,
   onDelete,
-  showNewProductCard,
-  onCancelNewProduct,
   clearMessage,
 }) {
   return (
     <div className="product-list">
-      {showNewProductCard && (
-        <Product
-          isNew={true}
-          product={{
-            id: 'new',
-            name: '',
-            description: '',
-            price: '',
-            category: '',
-            imageUrl: '',
-          }}
-          onCreate={onCreate}
-          onCancelNew={onCancelNewProduct}
-          clearMessage={clearMessage}
-        />
-      )}
-
-      {products.length === 0 && !showNewProductCard ? (
+      {products.length === 0 ? (
         <p>No products yet.</p>
       ) : (
         products.map((product) => (

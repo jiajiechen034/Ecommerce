@@ -1,33 +1,32 @@
 import { useState } from 'react';
 import './App.css';
 import ProductList from './components/ProductList';
+import ProductForm from './components/ProductForm';
 import { useProducts } from './hooks/useProducts';
 
 function App() {
-  const { products, loading, error, createProduct, updateProduct, deleteProduct } = useProducts();
+  const {
+    products,
+    loading,
+    error,
+    createProduct,
+    updateProduct,
+    deleteProduct,
+  } = useProducts();
+
   const [message, setMessage] = useState('');
-  const [showNewProductCard, setShowNewProductCard] = useState(false);
-
-  const handleAddClick = () => {
-    setShowNewProductCard(true);
-    setMessage('');
-  };
-
-  const handleCancelNewProduct = () => {
-    setShowNewProductCard(false);
-  };
+  const [page, setPage] = useState('shopping');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('all');
 
   const handleCreateProduct = async (productData) => {
     try {
       await createProduct(productData);
-      setShowNewProductCard(false);
       setMessage('Product added successfully');
+      setPage('shopping');
     } catch (err) {
-      if (err.message && err.message.includes('already exists')) {
-        setMessage('Product name is already taken. Please choose a different name.');
-      } else {
-        setMessage('Failed to add product');
-      }
+      setMessage('Failed to add product');
+      throw err;
     }
   };
 
@@ -37,6 +36,7 @@ function App() {
       setMessage('Product updated successfully');
     } catch (err) {
       setMessage('Failed to update product');
+      throw err;
     }
   };
 
@@ -49,6 +49,25 @@ function App() {
     }
   };
 
+  const categories = [
+    ...new Set(products.map((product) => product.category).filter(Boolean)),
+  ].sort();
+
+  const filteredProducts = products.filter((product) => {
+    const normalizedSearch = searchTerm.trim().toLowerCase();
+
+    const matchesSearch =
+      normalizedSearch === ''
+      || product.name?.toLowerCase().includes(normalizedSearch)
+      || product.description?.toLowerCase().includes(normalizedSearch)
+      || product.category?.toLowerCase().includes(normalizedSearch);
+
+    const matchesCategory =
+      selectedCategory === 'all' || product.category === selectedCategory;
+
+    return matchesSearch && matchesCategory;
+  });
+
   return (
     <div
       style={{
@@ -59,7 +78,33 @@ function App() {
         fontFamily: 'Arial, sans-serif',
       }}
     >
-      <h1>Products</h1>
+      <nav className="navbar">
+        <div className="navbar-logo">
+          My Store
+        </div>
+
+        <div className="navbar-links">
+          <button
+            className={`nav-link ${page === 'shopping' ? 'active-nav' : ''}`}
+            onClick={() => setPage('shopping')}
+          >
+            Shop
+          </button>
+
+          <button
+            className={`nav-link ${page === 'add' ? 'active-nav' : ''}`}
+            onClick={() => setPage('add')}
+          >
+            Add Product
+          </button>
+        </div>
+      </nav>
+
+      {message && (
+        <p className="loading-message">
+          {message}
+        </p>
+      )}
 
       {error && (
         <p className="error-message">
@@ -73,24 +118,60 @@ function App() {
         </p>
       )}
 
-      <button
-        onClick={handleAddClick}
-        disabled={showNewProductCard}
-        className="btn"
-        style={{ marginBottom: '20px' }}
-      >
-        + Add Product
-      </button>
+      {page === 'shopping' && (
+        <>
+          <div className="shop-controls">
+            <input
+              className="search-input"
+              type="text"
+              placeholder="Search products..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
 
-      <ProductList
-        products={products}
-        onCreate={handleCreateProduct}
-        onUpdate={handleUpdateProduct}
-        onDelete={handleDeleteProduct}
-        showNewProductCard={showNewProductCard}
-        onCancelNewProduct={handleCancelNewProduct}
-        clearMessage={() => setMessage('')}
-      />
+            <select
+              className="category-select"
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+            >
+              <option value="all">All Categories</option>
+
+              {categories.map((category) => (
+                <option key={category} value={category}>
+                  {category}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <ProductList
+            products={filteredProducts}
+            onUpdate={handleUpdateProduct}
+            onDelete={handleDeleteProduct}
+            clearMessage={() => setMessage('')}
+          />
+        </>
+      )}
+
+      {page === 'add' && (
+        <>
+          <h2>Add Product</h2>
+
+          <ProductForm
+            product={{
+              name: '',
+              description: '',
+              price: '',
+              category: '',
+              imageUrl: '',
+            }}
+            isNew={true}
+            onCreate={handleCreateProduct}
+            onCancel={() => setPage('shopping')}
+            clearMessage={() => setMessage('')}
+          />
+        </>
+      )}
     </div>
   );
 }
