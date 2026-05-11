@@ -48,7 +48,7 @@ function ProductForm({
         }
       });
     } else {
-      onUpdate(product.id, productData).catch((err) => {
+      onUpdate(productData).catch((err) => {
         if (err && err.message) {
           setError(err.message);
         } else {
