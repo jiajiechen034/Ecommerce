@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import './App.css';
 
 import ProductList from './components/ProductList';
@@ -10,7 +10,6 @@ import RegisterPage from './pages/RegisterPage';
 import { useProducts } from './hooks/useProducts';
 
 function App() {
-
   const {
     products,
     loading,
@@ -21,64 +20,59 @@ function App() {
   } = useProducts();
 
   const [message, setMessage] = useState('');
-
   const [page, setPage] = useState('shopping');
-
   const [searchTerm, setSearchTerm] = useState('');
-
   const [selectedCategory, setSelectedCategory] = useState('all');
-
   const [currentUser, setCurrentUser] = useState(null);
 
+  useEffect(() => {
+    const savedUser = localStorage.getItem('currentUser');
+
+    if (savedUser) {
+      try {
+        setCurrentUser(JSON.parse(savedUser));
+      } catch {
+        localStorage.removeItem('currentUser');
+      }
+    }
+  }, []);
+
   const handleCreateProduct = async (productData) => {
-
     try {
-
       await createProduct(productData);
-
       setMessage('Product added successfully');
-
     } catch (err) {
-
       setMessage('Failed to add product');
-
       throw err;
     }
   };
 
   const handleLogin = (user) => {
-
     setCurrentUser(user);
+
+    localStorage.setItem(
+      'currentUser',
+      JSON.stringify(user)
+    );
 
     setPage('shopping');
   };
 
   const handleUpdateProduct = async (id, productData) => {
-
     try {
-
       await updateProduct(id, productData);
-
       setMessage('Product updated successfully');
-
     } catch (err) {
-
       setMessage('Failed to update product');
-
       throw err;
     }
   };
 
   const handleDeleteProduct = async (id) => {
-
     try {
-
       await deleteProduct(id);
-
       setMessage('Product deleted successfully');
-
     } catch {
-
       setMessage('Failed to delete product');
     }
   };
@@ -92,7 +86,6 @@ function App() {
   ].sort((a, b) => a.localeCompare(b));
 
   const filteredProducts = products.filter((product) => {
-
     const normalizedSearch =
       searchTerm.trim().toLowerCase();
 
@@ -106,8 +99,11 @@ function App() {
       selectedCategory === 'all'
       || product.category === selectedCategory;
 
-    const currentUserEmail = currentUser?.email?.trim().toLowerCase();
-    const productOwnerEmail = product.createdBy?.trim().toLowerCase();
+    const currentUserEmail =
+      currentUser?.email?.trim().toLowerCase();
+
+    const productOwnerEmail =
+      product.createdBy?.trim().toLowerCase();
 
     const isNotOwnedByCurrentUser =
       !currentUserEmail
@@ -123,7 +119,10 @@ function App() {
           return false;
         }
 
-        return product.createdBy.trim().toLowerCase() === currentUser.email.trim().toLowerCase();
+        return (
+          product.createdBy.trim().toLowerCase()
+          === currentUser.email.trim().toLowerCase()
+        );
       })
     : [];
 
@@ -137,20 +136,15 @@ function App() {
         fontFamily: 'Arial, sans-serif',
       }}
     >
-
       <nav className="navbar">
-
         <div className="navbar-logo">
-          My Store
+          Store
         </div>
 
         <div className="navbar-links">
-
           <button
             className={`nav-link ${
-              page === 'shopping'
-                ? 'active-nav'
-                : ''
+              page === 'shopping' ? 'active-nav' : ''
             }`}
             onClick={() => setPage('shopping')}
           >
@@ -160,9 +154,7 @@ function App() {
           {currentUser && (
             <button
               className={`nav-link ${
-                page === 'add'
-                  ? 'active-nav'
-                  : ''
+                page === 'add' ? 'active-nav' : ''
               }`}
               onClick={() => setPage('add')}
             >
@@ -174,9 +166,8 @@ function App() {
             <button
               className="nav-link"
               onClick={() => {
-
                 setCurrentUser(null);
-
+                localStorage.removeItem('currentUser');
                 setPage('shopping');
               }}
             >
@@ -185,18 +176,14 @@ function App() {
           ) : (
             <button
               className={`nav-link ${
-                page === 'login'
-                  ? 'active-nav'
-                  : ''
+                page === 'login' ? 'active-nav' : ''
               }`}
               onClick={() => setPage('login')}
             >
               Login
             </button>
           )}
-
         </div>
-
       </nav>
 
       {message && (
@@ -219,9 +206,7 @@ function App() {
 
       {page === 'shopping' && (
         <>
-
           <div className="shop-controls">
-
             <input
               className="search-input"
               type="text"
@@ -239,7 +224,6 @@ function App() {
                 setSelectedCategory(e.target.value)
               }
             >
-
               <option value="all">
                 All Categories
               </option>
@@ -252,15 +236,10 @@ function App() {
                   {category}
                 </option>
               ))}
-
             </select>
-
           </div>
 
-          <ProductList
-            products={filteredProducts}
-          />
-
+          <ProductList products={filteredProducts} />
         </>
       )}
 
@@ -272,14 +251,11 @@ function App() {
       )}
 
       {page === 'register' && (
-        <RegisterPage
-          setPage={setPage}
-        />
+        <RegisterPage setPage={setPage} />
       )}
 
       {page === 'add' && (
         <>
-
           <h2>Add Product</h2>
 
           <ProductForm
@@ -311,10 +287,8 @@ function App() {
             onDelete={handleDeleteProduct}
             clearMessage={() => setMessage('')}
           />
-
         </>
       )}
-
     </div>
   );
 }
