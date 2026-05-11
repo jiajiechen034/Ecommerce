@@ -5,9 +5,17 @@ import org.springframework.web.multipart.MultipartFile;
 public class ProductRequest {
 
     private String name;
+
     private String description;
+
     private String category;
+
     private Double price;
+
+    private Integer quantity;
+
+    private String createdBy;
+
     private MultipartFile image;
 
     public String getName() {
@@ -40,6 +48,22 @@ public class ProductRequest {
 
     public void setPrice(Double price) {
         this.price = price;
+    }
+
+    public Integer getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(Integer quantity) {
+        this.quantity = quantity;
+    }
+
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
     }
 
     public MultipartFile getImage() {

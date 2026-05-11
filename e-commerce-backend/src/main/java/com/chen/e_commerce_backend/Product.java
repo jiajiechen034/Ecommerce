@@ -13,15 +13,22 @@ public class Product {
     private Long id;
 
     private String name;
+
     private String description;
+
     private String category;
+
     private Double price;
+
+    private Integer quantity;
+
+    private String createdBy;
+
     private String imageUrl;
+
     private Boolean sold;
 
-    // Required no-args constructor for JPA
     public Product() {
-        // Required by JPA
     }
 
     public Long getId() {
@@ -29,7 +36,7 @@ public class Product {
     }
 
     public String getName() {
-        return name; 
+        return name;
     }
 
     public void setName(String name) {
@@ -60,6 +67,22 @@ public class Product {
         this.price = price;
     }
 
+    public Integer getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(Integer quantity) {
+        this.quantity = quantity;
+    }
+
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
+    }
+
     public String getImageUrl() {
         return imageUrl;
     }
@@ -71,7 +94,7 @@ public class Product {
     public Boolean getSold() {
         return sold;
     }
-    
+
     public void setSold(Boolean sold) {
         this.sold = sold;
     }

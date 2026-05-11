@@ -38,14 +38,19 @@ function App() {
 
       setMessage('Product added successfully');
 
-      setPage('shopping');
-
     } catch (err) {
 
       setMessage('Failed to add product');
 
       throw err;
     }
+  };
+
+  const handleLogin = (user) => {
+
+    setCurrentUser(user);
+
+    setPage('shopping');
   };
 
   const handleUpdateProduct = async (id, productData) => {
@@ -72,17 +77,10 @@ function App() {
 
       setMessage('Product deleted successfully');
 
-    } catch (err) {
+    } catch {
 
       setMessage('Failed to delete product');
     }
-  };
-
-  const handleLogin = (user) => {
-
-    setCurrentUser(user);
-
-    setPage('shopping');
   };
 
   const categories = [
@@ -91,7 +89,7 @@ function App() {
         .map((product) => product.category)
         .filter(Boolean)
     ),
-  ].sort();
+  ].sort((a, b) => a.localeCompare(b));
 
   const filteredProducts = products.filter((product) => {
 
@@ -108,8 +106,26 @@ function App() {
       selectedCategory === 'all'
       || product.category === selectedCategory;
 
-    return matchesSearch && matchesCategory;
+    const currentUserEmail = currentUser?.email?.trim().toLowerCase();
+    const productOwnerEmail = product.createdBy?.trim().toLowerCase();
+
+    const isNotOwnedByCurrentUser =
+      !currentUserEmail
+      || !productOwnerEmail
+      || productOwnerEmail !== currentUserEmail;
+
+    return matchesSearch && matchesCategory && isNotOwnedByCurrentUser;
   });
+
+  const userProducts = currentUser
+    ? products.filter((product) => {
+        if (!product.createdBy || !currentUser.email) {
+          return false;
+        }
+
+        return product.createdBy.trim().toLowerCase() === currentUser.email.trim().toLowerCase();
+      })
+    : [];
 
   return (
     <div
@@ -154,21 +170,7 @@ function App() {
             </button>
           )}
 
-          {!currentUser ? (
-
-            <button
-              className={`nav-link ${
-                page === 'login'
-                  ? 'active-nav'
-                  : ''
-              }`}
-              onClick={() => setPage('login')}
-            >
-              Login
-            </button>
-
-          ) : (
-
+          {currentUser ? (
             <button
               className="nav-link"
               onClick={() => {
@@ -180,7 +182,17 @@ function App() {
             >
               Logout
             </button>
-
+          ) : (
+            <button
+              className={`nav-link ${
+                page === 'login'
+                  ? 'active-nav'
+                  : ''
+              }`}
+              onClick={() => setPage('login')}
+            >
+              Login
+            </button>
           )}
 
         </div>
@@ -247,9 +259,6 @@ function App() {
 
           <ProductList
             products={filteredProducts}
-            onUpdate={handleUpdateProduct}
-            onDelete={handleDeleteProduct}
-            clearMessage={() => setMessage('')}
           />
 
         </>
@@ -286,10 +295,20 @@ function App() {
             onCreate={(productData) =>
               handleCreateProduct({
                 ...productData,
-                createdBy: currentUser.email,
+                createdBy: currentUser?.email || '',
               })
             }
             onCancel={() => setPage('shopping')}
+            clearMessage={() => setMessage('')}
+          />
+
+          <h2>My Products</h2>
+
+          <ProductList
+            products={userProducts}
+            canManage={true}
+            onUpdate={handleUpdateProduct}
+            onDelete={handleDeleteProduct}
             clearMessage={() => setMessage('')}
           />
 

@@ -2,6 +2,7 @@ import Product from './Product';
 
 function ProductList({
   products,
+  canManage = false,
   onUpdate,
   onDelete,
   clearMessage,
@@ -15,6 +16,7 @@ function ProductList({
           <Product
             key={product.id}
             product={product}
+            canManage={canManage}
             onUpdate={onUpdate}
             onDelete={onDelete}
             clearMessage={clearMessage}
