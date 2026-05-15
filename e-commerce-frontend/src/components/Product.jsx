@@ -7,7 +7,9 @@ function Product({
   canManage = false,
   onUpdate,
   onDelete,
-  clearMessage,
+  clearMessage = () => {},
+  onAddToCart,
+  cartQuantity = 0,
 }) {
   const [isEditing, setIsEditing] = useState(false);
 
@@ -44,6 +46,8 @@ function Product({
       onEdit={handleStartEdit}
       onDelete={onDelete}
       clearMessage={clearMessage}
+      onAddToCart={onAddToCart}
+      cartQuantity={cartQuantity}
     />
   );
 }

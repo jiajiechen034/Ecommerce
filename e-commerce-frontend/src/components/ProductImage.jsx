@@ -1,10 +1,12 @@
+import { API_BASE_URL } from '../config/api';
+
 function ProductImage({ imageUrl }) {
   if (!imageUrl) return null;
 
   return (
     <div className="product-image">
       <img
-        src={`http://localhost:8080${imageUrl}`}
+        src={`${API_BASE_URL}${imageUrl}`}
         alt="Product"
       />
     </div>

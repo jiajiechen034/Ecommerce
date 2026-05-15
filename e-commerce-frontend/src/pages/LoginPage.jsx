@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { API_BASE_URL } from '../config/api';
 
 function LoginPage({ onLogin, setPage }) {
   const [email, setEmail] = useState('');
@@ -9,7 +10,7 @@ function LoginPage({ onLogin, setPage }) {
     setError('');
 
     try {
-      const res = await fetch('http://localhost:8080/api/auth/login', {
+      const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -20,13 +21,14 @@ function LoginPage({ onLogin, setPage }) {
         }),
       });
 
-      const data = await res.json();
+      const text = await res.text();
 
       if (!res.ok) {
-        setError(data);
+        setError(text);
         return;
       }
 
+      const data = JSON.parse(text);
       onLogin(data);
 
     } catch {

@@ -3,11 +3,34 @@ import './App.css';
 
 import ProductList from './components/ProductList';
 import ProductForm from './components/ProductForm';
+import Cart from './components/Cart';
 
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 
 import { useProducts } from './hooks/useProducts';
+
+const getCartStorageKey = (email) =>
+  `cartItems:${email.trim().toLowerCase()}`;
+
+const readStoredCart = (email) => {
+  if (!email) {
+    return [];
+  }
+
+  const storedCart = localStorage.getItem(getCartStorageKey(email));
+
+  if (!storedCart) {
+    return [];
+  }
+
+  try {
+    const parsedCart = JSON.parse(storedCart);
+    return Array.isArray(parsedCart) ? parsedCart : [];
+  } catch {
+    return [];
+  }
+};
 
 function App() {
   const {
@@ -24,18 +47,41 @@ function App() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [currentUser, setCurrentUser] = useState(null);
+  const [cartItems, setCartItems] = useState([]);
+  const cartItemCount = cartItems.reduce(
+    (sum, item) => sum + (item.quantity || 1),
+    0
+  );
+
+  const getCartQuantityByProductId = (productId) => {
+    const item = cartItems.find((cartItem) => cartItem.id === productId);
+    return item?.quantity || 0;
+  };
 
   useEffect(() => {
     const savedUser = localStorage.getItem('currentUser');
 
     if (savedUser) {
       try {
-        setCurrentUser(JSON.parse(savedUser));
+        const parsedUser = JSON.parse(savedUser);
+        setCurrentUser(parsedUser);
+        setCartItems(readStoredCart(parsedUser?.email));
       } catch {
         localStorage.removeItem('currentUser');
       }
     }
   }, []);
+
+  useEffect(() => {
+    if (!currentUser?.email) {
+      return;
+    }
+
+    localStorage.setItem(
+      getCartStorageKey(currentUser.email),
+      JSON.stringify(cartItems)
+    );
+  }, [cartItems, currentUser]);
 
   const handleCreateProduct = async (productData) => {
     try {
@@ -49,12 +95,20 @@ function App() {
 
   const handleLogin = (user) => {
     setCurrentUser(user);
+    setCartItems(readStoredCart(user?.email));
 
     localStorage.setItem(
       'currentUser',
       JSON.stringify(user)
     );
 
+    setPage('shopping');
+  };
+
+  const handleLogout = () => {
+    setCurrentUser(null);
+    setCartItems([]);
+    localStorage.removeItem('currentUser');
     setPage('shopping');
   };
 
@@ -72,9 +126,54 @@ function App() {
     try {
       await deleteProduct(id);
       setMessage('Product deleted successfully');
+
+      setCartItems((items) =>
+        items.filter((item) => item.id !== id)
+      );
     } catch {
       setMessage('Failed to delete product');
     }
+  };
+
+
+  const handleAddToCart = (product, quantity = 1) => {
+    setCartItems((items) => {
+      const existing = items.find((item) => item.id === product.id);
+      const maxQty = Number(product.quantity) || 1;
+      const existingQty = existing?.quantity || 0;
+      const remainingQty = Math.max(0, maxQty - existingQty);
+      const addQty = Math.max(1, Math.min(quantity, remainingQty));
+
+      if (remainingQty <= 0) {
+        setMessage('Cannot add more than available quantity');
+        return items;
+      }
+
+      if (existing) {
+        setMessage('Product quantity updated in cart');
+        return items.map((item) =>
+          item.id === product.id
+            ? { ...item, quantity: item.quantity + addQty }
+            : item
+        );
+      } else {
+        setMessage('Product added to cart');
+        return [...items, { ...product, quantity: addQty }];
+      }
+    });
+  };
+
+
+  const handleRemoveFromCart = (id) => {
+    setCartItems(
+      cartItems.filter((item) => item.id !== id)
+    );
+    setMessage('Product removed from cart');
+  };
+
+  const handleClearCart = () => {
+    setCartItems([]);
+    setMessage('Cart cleared');
   };
 
   const categories = [
@@ -151,6 +250,15 @@ function App() {
             Shop
           </button>
 
+          <button
+            className={`nav-link ${
+              page === 'cart' ? 'active-nav' : ''
+            }`}
+            onClick={() => setPage('cart')}
+          >
+            Cart <span className="nav-count-badge">{cartItemCount}</span>
+          </button>
+
           {currentUser && (
             <button
               className={`nav-link ${
@@ -165,11 +273,7 @@ function App() {
           {currentUser ? (
             <button
               className="nav-link"
-              onClick={() => {
-                setCurrentUser(null);
-                localStorage.removeItem('currentUser');
-                setPage('shopping');
-              }}
+              onClick={handleLogout}
             >
               Logout
             </button>
@@ -239,8 +343,20 @@ function App() {
             </select>
           </div>
 
-          <ProductList products={filteredProducts} />
+          <ProductList
+            products={filteredProducts}
+            onAddToCart={handleAddToCart}
+            getCartQuantityByProductId={getCartQuantityByProductId}
+          />
         </>
+      )}
+
+      {page === 'cart' && (
+        <Cart
+          cartItems={cartItems}
+          onRemoveFromCart={handleRemoveFromCart}
+          onClearCart={handleClearCart}
+        />
       )}
 
       {page === 'login' && (

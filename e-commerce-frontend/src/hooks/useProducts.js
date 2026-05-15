@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { API_BASE_URL } from '../config/api';
 
 export function useProducts() {
 
@@ -17,7 +18,7 @@ export function useProducts() {
     try {
 
       const res =
-        await fetch('http://localhost:8080/api/products');
+        await fetch(`${API_BASE_URL}/api/products`);
 
       if (!res.ok) {
         throw new Error('Failed to fetch products');
@@ -77,7 +78,7 @@ export function useProducts() {
     }
 
     const res = await fetch(
-      'http://localhost:8080/api/products',
+      `${API_BASE_URL}/api/products`,
       {
         method: 'POST',
         body: formData,
@@ -134,7 +135,7 @@ export function useProducts() {
     }
 
     const res = await fetch(
-      `http://localhost:8080/api/products/${id}`,
+      `${API_BASE_URL}/api/products/${id}`,
       {
         method: 'PUT',
         body: formData,
@@ -159,7 +160,7 @@ export function useProducts() {
   const deleteProduct = async (id) => {
 
     const res = await fetch(
-      `http://localhost:8080/api/products/${id}`,
+      `${API_BASE_URL}/api/products/${id}`,
       {
         method: 'DELETE',
       }

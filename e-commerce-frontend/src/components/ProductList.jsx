@@ -5,7 +5,9 @@ function ProductList({
   canManage = false,
   onUpdate,
   onDelete,
-  clearMessage,
+  clearMessage = () => {},
+  onAddToCart,
+  getCartQuantityByProductId = () => 0,
 }) {
   return (
     <div className="product-list">
@@ -20,6 +22,8 @@ function ProductList({
             onUpdate={onUpdate}
             onDelete={onDelete}
             clearMessage={clearMessage}
+            onAddToCart={onAddToCart}
+            cartQuantity={getCartQuantityByProductId(product.id)}
           />
         ))
       )}
