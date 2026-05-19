@@ -1,4 +1,15 @@
-function Cart({ cartItems, onRemoveFromCart, onClearCart }) {
+import PropTypes from 'prop-types';
+
+function Cart({
+  cartItems,
+  onRemoveFromCart,
+  onClearCart,
+  onCheckout,
+  isCheckoutPending = false,
+  canCheckout = false,
+}) {
+  const itemCount = cartItems.reduce((sum, item) => sum + (item.quantity || 1), 0);
+
   const total = cartItems.reduce(
     (sum, item) => sum + Number(item.price) * (item.quantity || 1),
     0
@@ -13,7 +24,7 @@ function Cart({ cartItems, onRemoveFromCart, onClearCart }) {
         </div>
 
         <p className="cart-item-count">
-          {cartItems.reduce((sum, item) => sum + (item.quantity || 1), 0)} item{cartItems.reduce((sum, item) => sum + (item.quantity || 1), 0) === 1 ? '' : 's'}
+          {itemCount} item{itemCount === 1 ? '' : 's'}
         </p>
       </div>
 
@@ -81,14 +92,42 @@ function Cart({ cartItems, onRemoveFromCart, onClearCart }) {
               Review your items before checking out.
             </p>
 
-            <button className="btn btn-primary cart-checkout-button" type="button">
-              Checkout
+            <button
+              className="btn btn-primary cart-checkout-button"
+              type="button"
+              onClick={onCheckout}
+              disabled={isCheckoutPending || cartItems.length === 0 || !canCheckout}
+            >
+              {isCheckoutPending ? 'Processing...' : 'Checkout'}
             </button>
+
+            {!canCheckout && (
+              <p className="cart-summary-note">
+                Login is required to checkout.
+              </p>
+            )}
           </aside>
         </div>
       )}
     </div>
   );
 }
+
+Cart.propTypes = {
+  cartItems: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
+      name: PropTypes.string,
+      description: PropTypes.string,
+      price: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+      quantity: PropTypes.number,
+    })
+  ).isRequired,
+  onRemoveFromCart: PropTypes.func.isRequired,
+  onClearCart: PropTypes.func.isRequired,
+  onCheckout: PropTypes.func,
+  isCheckoutPending: PropTypes.bool,
+  canCheckout: PropTypes.bool,
+};
 
 export default Cart;

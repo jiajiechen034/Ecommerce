@@ -7,8 +7,10 @@ import Cart from './components/Cart';
 
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
+import TransactionHistoryPage from './pages/TransactionHistoryPage';
 
 import { useProducts } from './hooks/useProducts';
+import { API_BASE_URL } from './config/api';
 
 const getCartStorageKey = (email) =>
   `cartItems:${email.trim().toLowerCase()}`;
@@ -32,6 +34,35 @@ const readStoredCart = (email) => {
   }
 };
 
+const syncCartWithProducts = (items, products) => {
+  if (!items.length) {
+    return items;
+  }
+
+  return items
+    .map((item) => {
+      const latestProduct = products.find((product) => product.id === item.id);
+
+      if (!latestProduct) {
+        return null;
+      }
+
+      const latestQuantity = Math.max(0, Number(latestProduct.quantity) || 0);
+
+      if (latestQuantity <= 0) {
+        return null;
+      }
+
+      const nextQuantity = Math.min(item.quantity || 1, latestQuantity);
+
+      return {
+        ...latestProduct,
+        quantity: nextQuantity,
+      };
+    })
+    .filter(Boolean);
+};
+
 function App() {
   const {
     products,
@@ -40,6 +71,7 @@ function App() {
     createProduct,
     updateProduct,
     deleteProduct,
+    refreshProducts,
   } = useProducts();
 
   const [message, setMessage] = useState('');
@@ -48,6 +80,7 @@ function App() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [currentUser, setCurrentUser] = useState(null);
   const [cartItems, setCartItems] = useState([]);
+  const [isCheckoutPending, setIsCheckoutPending] = useState(false);
   const cartItemCount = cartItems.reduce(
     (sum, item) => sum + (item.quantity || 1),
     0
@@ -82,6 +115,12 @@ function App() {
       JSON.stringify(cartItems)
     );
   }, [cartItems, currentUser]);
+
+  useEffect(() => {
+    setCartItems((items) => {
+      return syncCartWithProducts(items, products);
+    });
+  }, [products]);
 
   const handleCreateProduct = async (productData) => {
     try {
@@ -176,15 +215,66 @@ function App() {
     setMessage('Cart cleared');
   };
 
+  const handleCheckout = async () => {
+    if (!currentUser?.email) {
+      setMessage('Please login to checkout');
+      setPage('login');
+      return;
+    }
+
+    if (cartItems.length === 0) {
+      setMessage('Your cart is empty');
+      return;
+    }
+
+    setIsCheckoutPending(true);
+
+    try {
+      const payload = {
+        userEmail: currentUser.email,
+        items: cartItems.map((item) => ({
+          productId: item.id,
+          quantity: item.quantity || 1,
+        })),
+      };
+
+      const res = await fetch(`${API_BASE_URL}/api/transactions/checkout`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        const errMessage = await res.text();
+        throw new Error(errMessage || 'Checkout failed');
+      }
+
+      await refreshProducts();
+      setCartItems([]);
+      setMessage('Checkout completed successfully');
+      setPage('history');
+    } catch (err) {
+      setMessage(err.message || 'Checkout failed');
+    } finally {
+      setIsCheckoutPending(false);
+    }
+  };
+
+  const availableProducts = products.filter(
+    (product) => Number(product.quantity) > 0
+  );
+
   const categories = [
     ...new Set(
-      products
+      availableProducts
         .map((product) => product.category)
         .filter(Boolean)
     ),
   ].sort((a, b) => a.localeCompare(b));
 
-  const filteredProducts = products.filter((product) => {
+  const filteredProducts = availableProducts.filter((product) => {
     const normalizedSearch =
       searchTerm.trim().toLowerCase();
 
@@ -267,6 +357,17 @@ function App() {
               onClick={() => setPage('add')}
             >
               Add Product
+            </button>
+          )}
+
+          {currentUser && (
+            <button
+              className={`nav-link ${
+                page === 'history' ? 'active-nav' : ''
+              }`}
+              onClick={() => setPage('history')}
+            >
+              History
             </button>
           )}
 
@@ -356,6 +457,15 @@ function App() {
           cartItems={cartItems}
           onRemoveFromCart={handleRemoveFromCart}
           onClearCart={handleClearCart}
+          onCheckout={handleCheckout}
+          isCheckoutPending={isCheckoutPending}
+          canCheckout={Boolean(currentUser)}
+        />
+      )}
+
+      {page === 'history' && (
+        <TransactionHistoryPage
+          currentUser={currentUser}
         />
       )}
 

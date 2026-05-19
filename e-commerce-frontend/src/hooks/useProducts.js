@@ -187,5 +187,6 @@ export function useProducts() {
     createProduct,
     updateProduct,
     deleteProduct,
+    refreshProducts: fetchProducts,
   };
 }
