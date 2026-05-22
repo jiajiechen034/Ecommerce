@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@CrossOrigin(origins = "https://ecommerce-moaq3i2oe-jiajie-chen-s-projects.vercel.app")
+@CrossOrigin(origins = "https://ecommerce-lyart-two-19.vercel.app")
 @RestController
 @RequestMapping("/api/transactions")
 public class CheckoutController {

@@ -3,7 +3,7 @@ package com.chen.e_commerce_backend;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@CrossOrigin(origins = "https://ecommerce-moaq3i2oe-jiajie-chen-s-projects.vercel.app")
+@CrossOrigin(origins = "https://ecommerce-lyart-two-19.vercel.app")
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
