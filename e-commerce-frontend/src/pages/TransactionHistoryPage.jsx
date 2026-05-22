@@ -70,7 +70,6 @@ function TransactionHistoryPage({ currentUser }) {
             <article key={transaction.id} className="history-card">
               <div className="history-card-header">
                 <div>
-                  <p className="history-meta">Transaction #{transaction.id}</p>
                   <p className="history-date">
                     {transaction.createdAt
                       ? new Date(transaction.createdAt).toLocaleString()

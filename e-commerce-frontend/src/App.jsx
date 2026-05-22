@@ -253,7 +253,6 @@ function App() {
 
       await refreshProducts();
       setCartItems([]);
-      setMessage('Checkout completed successfully');
       setPage('history');
     } catch (err) {
       setMessage(err.message || 'Checkout failed');

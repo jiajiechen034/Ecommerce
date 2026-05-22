@@ -3,7 +3,11 @@ package com.chen.e_commerce_backend;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(originPatterns = {
+    "http://localhost:5173",
+    "http://localhost:3000",
+    "https://*.vercel.app"
+})
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
