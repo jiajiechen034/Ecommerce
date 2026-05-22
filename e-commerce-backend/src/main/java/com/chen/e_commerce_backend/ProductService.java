@@ -1,44 +1,31 @@
 package com.chen.e_commerce_backend;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class ProductService {
 
-    private static final Logger logger =
-            LoggerFactory.getLogger(ProductService.class);
-
     private final ProductRepository productRepository;
 
-    private final Path uploadPath = Paths.get("uploads");
+    private final Cloudinary cloudinary;
 
     private static final long MAX_IMAGE_SIZE =
             2L * 1024 * 1024;
 
-    public ProductService(ProductRepository productRepository) {
+    public ProductService(
+            ProductRepository productRepository,
+            Cloudinary cloudinary
+    ) {
 
         this.productRepository = productRepository;
-
-        try {
-
-            Files.createDirectories(uploadPath);
-
-        } catch (IOException e) {
-
-            throw new IllegalStateException(
-                    "Could not create uploads folder",
-                    e
-            );
-        }
+        this.cloudinary = cloudinary;
     }
 
     public List<Product> getAllProducts() {
@@ -73,9 +60,9 @@ public class ProductService {
 
             validateImageSize(image);
 
-            String imagePath = saveImage(image);
+            String imageUrl = uploadImage(image);
 
-            product.setImageUrl(imagePath);
+            product.setImageUrl(imageUrl);
         }
 
         return productRepository.save(product);
@@ -102,19 +89,19 @@ public class ProductService {
 
                         validateImageSize(image);
 
-                        if (product.getImageUrl() != null) {
+                        String imageUrl = uploadImage(image);
 
-                            deleteImageFile(product.getImageUrl());
-                        }
-
-                        String imagePath = saveImage(image);
-
-                        product.setImageUrl(imagePath);
+                        product.setImageUrl(imageUrl);
                     }
 
                     return productRepository.save(product);
                 })
                 .orElse(null);
+    }
+
+    public void deleteProduct(Long id) {
+
+        productRepository.deleteById(id);
     }
 
     private void validateImageSize(MultipartFile image) {
@@ -127,62 +114,27 @@ public class ProductService {
         }
     }
 
-    public void deleteProduct(Long id) {
-
-        Product product =
-                productRepository.findById(id).orElse(null);
-
-        if (product != null && product.getImageUrl() != null) {
-
-            deleteImageFile(product.getImageUrl());
-        }
-
-        productRepository.deleteById(id);
-    }
-
-    private void deleteImageFile(String imageUrl) {
+    private String uploadImage(MultipartFile image) {
 
         try {
 
-            String filename =
-                    imageUrl.substring("/uploads/".length());
+            Map uploadResult =
+                    cloudinary.uploader().upload(
+                            image.getBytes(),
+                            ObjectUtils.asMap(
+                                    "folder",
+                                    "ecommerce-products"
+                            )
+                    );
 
-            Path filePath = uploadPath.resolve(filename);
-
-            Files.deleteIfExists(filePath);
-
-        } catch (IOException e) {
-
-            logger.error(
-                    "Could not delete image file: {}",
-                    imageUrl
-            );
-        }
-    }
-
-    private String saveImage(MultipartFile image) {
-
-        try {
-
-            String originalFilename =
-                    image.getOriginalFilename();
-
-            String safeFilename =
-                    System.currentTimeMillis()
-                            + "-"
-                            + originalFilename;
-
-            Path filePath =
-                    uploadPath.resolve(safeFilename);
-
-            Files.copy(image.getInputStream(), filePath);
-
-            return "/uploads/" + safeFilename;
+            return uploadResult
+                    .get("secure_url")
+                    .toString();
 
         } catch (IOException e) {
 
             throw new IllegalStateException(
-                    "Could not save image",
+                    "Could not upload image",
                     e
             );
         }

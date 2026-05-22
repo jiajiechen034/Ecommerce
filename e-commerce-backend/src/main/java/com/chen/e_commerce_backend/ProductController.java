@@ -6,11 +6,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@CrossOrigin(originPatterns = {
-    "http://localhost:5173",
-    "http://localhost:3000",
-    "https://*.vercel.app"
-})
+@CrossOrigin(origins = "https://ecommerce-moaq3i2oe-jiajie-chen-s-projects.vercel.app")
 @RestController
 public class ProductController {
 
