@@ -4,6 +4,7 @@ A modern full-stack e-commerce application built with React, Spring Boot, Postgr
 
 This project demonstrates a complete cloud-deployed shopping platform with product management, image uploads, shopping cart functionality, transactional checkout flows, and purchase history tracking.
 
+![Demo Screenshot](assets/demo.png)
 ## Live Demo
 
 URL: https://ecommerce-lyart-two-19.vercel.app/
