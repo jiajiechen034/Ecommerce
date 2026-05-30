@@ -1,4 +1,4 @@
-package com.chen.e_commerce_backend;
+package com.chen.e_commerce_backend.dto.request;
 
 import java.util.List;
 

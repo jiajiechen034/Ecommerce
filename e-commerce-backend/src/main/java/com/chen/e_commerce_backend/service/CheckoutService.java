@@ -1,4 +1,15 @@
-package com.chen.e_commerce_backend;
+package com.chen.e_commerce_backend.service;
+
+import com.chen.e_commerce_backend.dto.request.CheckoutItemRequest;
+import com.chen.e_commerce_backend.dto.request.CheckoutRequest;
+import com.chen.e_commerce_backend.dto.response.TransactionHistoryItemResponse;
+import com.chen.e_commerce_backend.dto.response.TransactionHistoryResponse;
+import com.chen.e_commerce_backend.model.Product;
+import com.chen.e_commerce_backend.model.PurchaseTransaction;
+import com.chen.e_commerce_backend.model.PurchaseTransactionItem;
+import com.chen.e_commerce_backend.repository.ProductRepository;
+import com.chen.e_commerce_backend.repository.PurchaseTransactionRepository;
+import com.chen.e_commerce_backend.repository.UserRepository;
 
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;

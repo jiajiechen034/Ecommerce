@@ -1,4 +1,6 @@
-package com.chen.e_commerce_backend;
+package com.chen.e_commerce_backend.repository;
+
+import com.chen.e_commerce_backend.model.PurchaseTransaction;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 

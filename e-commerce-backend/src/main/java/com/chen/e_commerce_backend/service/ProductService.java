@@ -1,4 +1,8 @@
-package com.chen.e_commerce_backend;
+package com.chen.e_commerce_backend.service;
+
+import com.chen.e_commerce_backend.dto.request.ProductRequest;
+import com.chen.e_commerce_backend.model.Product;
+import com.chen.e_commerce_backend.repository.ProductRepository;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;

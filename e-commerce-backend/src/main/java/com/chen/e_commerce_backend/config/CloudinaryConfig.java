@@ -1,4 +1,5 @@
-package com.chen.e_commerce_backend;
+package com.chen.e_commerce_backend.config;
+
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import org.springframework.context.annotation.Bean;

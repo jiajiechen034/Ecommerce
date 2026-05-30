@@ -1,4 +1,8 @@
-package com.chen.e_commerce_backend;
+package com.chen.e_commerce_backend.controller;
+
+import com.chen.e_commerce_backend.dto.request.ProductRequest;
+import com.chen.e_commerce_backend.model.Product;
+import com.chen.e_commerce_backend.service.ProductService;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

@@ -1,6 +1,14 @@
-package com.chen.e_commerce_backend;
+package com.chen.e_commerce_backend.model;
 
-public class TransactionHistoryItemResponse {
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "purchase_transaction_items")
+public class PurchaseTransactionItem {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     private Long productId;
 
@@ -11,6 +19,14 @@ public class TransactionHistoryItemResponse {
     private Integer quantity;
 
     private Double lineTotal;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "transaction_id", nullable = false)
+    private PurchaseTransaction transaction;
+
+    public Long getId() {
+        return id;
+    }
 
     public Long getProductId() {
         return productId;
@@ -50,5 +66,13 @@ public class TransactionHistoryItemResponse {
 
     public void setLineTotal(Double lineTotal) {
         this.lineTotal = lineTotal;
+    }
+
+    public PurchaseTransaction getTransaction() {
+        return transaction;
+    }
+
+    public void setTransaction(PurchaseTransaction transaction) {
+        this.transaction = transaction;
     }
 }

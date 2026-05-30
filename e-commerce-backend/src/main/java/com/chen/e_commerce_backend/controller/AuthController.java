@@ -1,4 +1,8 @@
-package com.chen.e_commerce_backend;
+package com.chen.e_commerce_backend.controller;
+
+import com.chen.e_commerce_backend.dto.request.AuthRequest;
+import com.chen.e_commerce_backend.model.User;
+import com.chen.e_commerce_backend.repository.UserRepository;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
